@@ -93,7 +93,6 @@ export default function PreventiveMaintenancePage() {
             onPointerDownOutside={(e) => e.preventDefault()}
             onInteractOutside={(e) => e.preventDefault()}
           >
-
             <DialogHeader>
               <DialogTitle>Schedule New PM Task</DialogTitle>
               <DialogDescription>Fill out the form below to create a new maintenance task.</DialogDescription>

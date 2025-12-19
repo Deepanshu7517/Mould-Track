@@ -1,96 +1,127 @@
-
 'use client';
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
 import type { PMTask } from '../../lib/data';
 import { cn } from '../../lib/utils';
 
-
-const COLORS = {
-  Completed: 'hsl(var(--chart-1))',
-  Overdue: 'hsl(var(--destructive))',
-  'In Progress': 'hsl(var(--chart-2))',
-  Scheduled: 'hsl(var(--chart-3))',
+// Reliable Hex Colors
+const STATUS_COLORS: Record<string, string> = {
+  Completed: '#10b981',   // Emerald
+  Overdue: '#f97316',     // Orange
+  'In Progress': '#ef4444', // Red
+  Scheduled: '#3b82f6',   // Blue
 };
 
 interface PMStatusChartProps {
-    tasks: PMTask[];
-    onStatusSelect: (status: string | null) => void;
-    activeStatus: string | null;
+  tasks: PMTask[];
+  onStatusSelect: (status: string | null) => void;
+  activeStatus: string | null;
 }
 
 export function PMStatusChart({ tasks, onStatusSelect, activeStatus }: PMStatusChartProps) {
-  const data = Object.entries(tasks.reduce((acc, task) => {
+  // 1. Process Data
+  const stats = tasks.reduce((acc, task) => {
     acc[task.status] = (acc[task.status] || 0) + 1;
     return acc;
-  }, {} as Record<string, number>)).map(([name, value]) => ({ name, value }));
+  }, {} as Record<string, number>);
 
-  const totalTasks = data.reduce((acc, curr) => acc + curr.value, 0);
+  const data = Object.entries(stats).map(([name, value]) => ({ name, value }));
+  const totalTasks = tasks.length;
 
-  const CustomLegend = (props: any) => {
-      const { payload } = props;
-      return (
-          <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
-              {payload.map((entry: any, index: number) => (
-                  <li
-                      key={`item-${index}`}
-                      onClick={() => onStatusSelect(entry.value === activeStatus ? null : entry.value)}
-                      className={cn(
-                        "flex items-center gap-2 cursor-pointer transition-opacity",
-                        activeStatus && activeStatus !== entry.value ? "opacity-50" : "opacity-100"
-                      )}
-                  >
-                      <span style={{ backgroundColor: entry.color }} className="h-3 w-3 rounded-full inline-block" />
-                      <span>{entry.value}: {entry.payload.value}</span>
-                  </li>
-              ))}
-          </ul>
-      );
-  }
+  // 2. SVG Constants for Donut
+  const size = 200;
+  const strokeWidth = 24; // Wide border look
+  const center = size / 2;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+
+  let cumulativeOffset = 0;
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle>Maintenance Status</CardTitle>
-        <CardDescription>Breakdown of all PM tasks by status. Click a status to filter the table.</CardDescription>
+        <CardDescription>Breakdown of all PM tasks by status. Click a status to filter.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="relative h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                innerRadius={60}
-                fill="#8884d8"
-                dataKey="value"
-                onClick={(pieData) => onStatusSelect(pieData.name === activeStatus ? null : pieData.name)}
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[entry.name as keyof typeof COLORS]} className={cn("cursor-pointer outline-none ring-primary/50 focus:ring-2", activeStatus && activeStatus !== entry.name && "opacity-50" )} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  background: 'hsl(var(--background))',
-                  borderColor: 'hsl(var(--border))',
-                  borderRadius: 'var(--radius)',
-                }}
-              />
-              <Legend content={<CustomLegend />} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div 
-            className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer"
-            onClick={() => onStatusSelect(null)}
-            title="Show all tasks"
-          >
-            <span className="text-3xl font-bold">{totalTasks}</span>
-            <span className="text-sm text-muted-foreground">Total Tasks</span>
+        <div className="flex flex-col items-center justify-center space-y-8 py-4">
+          
+          {/* --- CUSTOM DONUT START --- */}
+          <div className="relative" style={{ width: size, height: size }}>
+            <svg width={size} height={size} className="transform -rotate-90">
+              {data.map((entry) => {
+                const percentage = (entry.value / totalTasks) * 100;
+                const strokeDashoffset = circumference - (percentage / 100) * circumference;
+                const currentOffset = cumulativeOffset;
+                
+                // Update offset for next segment
+                cumulativeOffset += (percentage / 100) * circumference;
+
+                const isActive = activeStatus === entry.name || !activeStatus;
+                const color = STATUS_COLORS[entry.name] || '#cbd5e1';
+
+                return (
+                  <circle
+                    key={entry.name}
+                    cx={center}
+                    cy={center}
+                    r={radius}
+                    fill="transparent"
+                    stroke={color}
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={circumference}
+                    strokeDashoffset={circumference - (percentage / 100) * circumference}
+                    style={{
+                      transform: `rotate(${(currentOffset / circumference) * 360}deg)`,
+                      transformOrigin: '50% 50%',
+                      transition: 'all 0.5s ease',
+                      opacity: isActive ? 1 : 0.2
+                    }}
+                    className="cursor-pointer hover:brightness-110"
+                    onClick={() => onStatusSelect(activeStatus === entry.name ? null : entry.name)}
+                  />
+                );
+              })}
+            </svg>
+
+            {/* Center Text Component */}
+            <div 
+              className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer select-none"
+              onClick={() => onStatusSelect(null)}
+            >
+              <span className="text-4xl font-extrabold text-foreground leading-none">{totalTasks}</span>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter mt-1">Total Tasks</span>
+            </div>
+          </div>
+          {/* --- CUSTOM DONUT END --- */}
+
+          {/* CUSTOM LEGEND */}
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-3 w-full">
+            {data.map((entry) => {
+              const isActive = activeStatus === entry.name || !activeStatus;
+              return (
+                <button
+                  key={entry.name}
+                  onClick={() => onStatusSelect(activeStatus === entry.name ? null : entry.name)}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all",
+                    isActive ? "bg-secondary border-border" : "opacity-40 grayscale-[0.5]"
+                  )}
+                >
+                  <span 
+                    className="h-2.5 w-2.5 rounded-full" 
+                    style={{ backgroundColor: STATUS_COLORS[entry.name] }} 
+                  />
+                  <span className="text-xs font-bold text-foreground">
+                    {entry.name}
+                  </span>
+                  <span className="text-xs font-mono text-muted-foreground bg-muted px-1.5 rounded">
+                    {entry.value}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </CardContent>

@@ -1,12 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form' // Added useWatch
 import { format, addDays } from 'date-fns'
 import { Check, ChevronsUpDown } from 'lucide-preact'
 
 /* -------------------- UI IMPORTS -------------------- */
-
 import {
   Form,
   FormControl,
@@ -25,7 +24,6 @@ import {
 import { cn } from '../../lib/utils'
 
 /* -------------------- COMMAND (INLINE) -------------------- */
-
 import { Command as CommandPrimitive } from 'cmdk'
 
 const Command = React.forwardRef<
@@ -89,7 +87,6 @@ const CommandItem = React.forwardRef<
 CommandItem.displayName = 'CommandItem'
 
 /* -------------------- COMBOBOX -------------------- */
-
 type Option = { value: string; label: string }
 
 function Combobox({
@@ -159,7 +156,6 @@ function Combobox({
 }
 
 /* -------------------- DATA -------------------- */
-
 import { machineData, checksheetData } from '../../lib/data'
 import type { PMTask } from '../../lib/data'
 import { useToast } from '../../hooks/use-toast'
@@ -175,7 +171,6 @@ const checksheetOptions = checksheetData.map(cs => ({
 }))
 
 /* -------------------- FORM -------------------- */
-
 interface FormValues {
   mould: string
   assignee: string
@@ -196,6 +191,17 @@ export function PMScheduleForm({
       checksheet: '',
     },
   })
+
+  // 1. WATCH: Listens for changes in the checksheet combobox
+  const selectedChecksheetId = useWatch({
+    control: form.control,
+    name: "checksheet"
+  });
+
+  // 2. FIND: Matches selected ID to data for the table preview
+  const selectedChecksheetData = React.useMemo(() => {
+    return checksheetData.find(cs => cs.id === selectedChecksheetId);
+  }, [selectedChecksheetId]);
 
   const dueDate = addDays(new Date(), 7)
 
@@ -286,6 +292,36 @@ export function PMScheduleForm({
             </FormItem>
           )}
         />
+
+        {/* 3. TABLE PREVIEW: Displays when a checksheet is selected */}
+        {selectedChecksheetData && (
+          <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-300">
+            <FormLabel className="text-sm font-semibold text-slate-700">Checklist Preview</FormLabel>
+            <div className="rounded-md border bg-slate-50 overflow-hidden">
+              <div className="max-h-52 overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+                <table className="w-full text-[13px] border-collapse bg-white">
+                  <thead className="bg-slate-100 sticky top-0 z-10 shadow-sm">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-bold text-slate-600 border-b w-10">No.</th>
+                      <th className="px-3 py-2 text-left font-bold text-slate-600 border-b">Task Description</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {selectedChecksheetData.tasks.map((task, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-3 py-2 text-slate-400 font-mono text-center border-r">{idx + 1}</td>
+                        <td className="px-3 py-2 text-slate-700">{task}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground italic">
+              * The table above reflects the tasks that will be assigned.
+            </p>
+          </div>
+        )}
 
         <Button type="submit" className="w-full">
           Schedule Task
