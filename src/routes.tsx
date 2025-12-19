@@ -11,6 +11,7 @@ import HealthPage from "./app/(app)/health/page";
 import BreakdownsPage from "./app/(app)/breakdowns/page";
 import AssetsManagementPage from "./app/(app)/assets-management/page";
 import SettingsPage from "./app/(app)/settings/page";
+import CheckSheet from "./app/(app)/checkSheet/checkSheet";
 
 const routes = createBrowserRouter([
   {
@@ -88,6 +89,14 @@ const routes = createBrowserRouter([
     element: <RootLayout>
       <AppLayout>
         <SettingsPage />
+      </AppLayout>
+    </RootLayout>
+  },
+  {
+    path: "/check-sheet",
+    element: <RootLayout>
+      <AppLayout>
+        <CheckSheet />
       </AppLayout>
     </RootLayout>
   },

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import {
   Card,
   CardContent,
@@ -22,13 +23,32 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "../../components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../../components/ui/form";
 import { Button } from "../../components/ui/button";
-import { Edit, Trash2, Settings2, ChevronDown } from "lucide-preact";
+import { Input } from "../../components/ui/input";
+import { Edit, Trash2, Settings2, ChevronDown, PlusCircle } from "lucide-preact";
+import { useToast } from "../../hooks/use-toast";
 
 /* -------------------- TYPES -------------------- */
 
 interface fixtureMasterType {
-  id: string;
+  id?: string;
   fixtureCode: string;
   fixtureName: string;
   model: string;
@@ -66,28 +86,120 @@ const mockFixtures: fixtureMasterType[] = [
     lastModifiedDate: "2024-12-01",
   },
   {
-    id: "FX-002",
-    fixtureCode: "FIX-1002",
-    fixtureName: "Rear Bracket Fixture",
-    model: "RB-MD",
-    supplierName: "MechWorks India",
-    dateReceived: "2023-11-05",
-    validationCycle: "12 Months",
-    lastValidationDate: "2023-11-05",
-    nextValidationDate: "2024-11-05",
-    currentStatus: "Validation Due",
-    currentLocation: "Production Line 2",
-    documents: "rear-bracket-drawing.pdf",
-    remarks: "Validation pending",
-    createdBy: "Quality Team",
-    lastModifiedDate: "2024-10-20",
+    id: "FX-001",
+    fixtureCode: "FIX-1001",
+    fixtureName: "Front Panel Fixture",
+    model: "FP-XL",
+    supplierName: "Accurate Tools Pvt Ltd",
+    dateReceived: "2024-02-10",
+    validationCycle: "6 Months",
+    lastValidationDate: "2024-08-10",
+    nextValidationDate: "2025-02-10",
+    currentStatus: "Active",
+    currentLocation: "Tool Room A",
+    documents: "front-panel-fixture.pdf",
+    remarks: "Working fine",
+    createdBy: "Admin",
+    lastModifiedDate: "2024-12-01",
+  },
+  {
+    id: "FX-001",
+    fixtureCode: "FIX-1001",
+    fixtureName: "Front Panel Fixture",
+    model: "FP-XL",
+    supplierName: "Accurate Tools Pvt Ltd",
+    dateReceived: "2024-02-10",
+    validationCycle: "6 Months",
+    lastValidationDate: "2024-08-10",
+    nextValidationDate: "2025-02-10",
+    currentStatus: "Active",
+    currentLocation: "Tool Room A",
+    documents: "front-panel-fixture.pdf",
+    remarks: "Working fine",
+    createdBy: "Admin",
+    lastModifiedDate: "2024-12-01",
+  },
+  {
+    id: "FX-001",
+    fixtureCode: "FIX-1001",
+    fixtureName: "Front Panel Fixture",
+    model: "FP-XL",
+    supplierName: "Accurate Tools Pvt Ltd",
+    dateReceived: "2024-02-10",
+    validationCycle: "6 Months",
+    lastValidationDate: "2024-08-10",
+    nextValidationDate: "2025-02-10",
+    currentStatus: "Active",
+    currentLocation: "Tool Room A",
+    documents: "front-panel-fixture.pdf",
+    remarks: "Working fine",
+    createdBy: "Admin",
+    lastModifiedDate: "2024-12-01",
+  },
+  {
+    id: "FX-001",
+    fixtureCode: "FIX-1001",
+    fixtureName: "Front Panel Fixture",
+    model: "FP-XL",
+    supplierName: "Accurate Tools Pvt Ltd",
+    dateReceived: "2024-02-10",
+    validationCycle: "6 Months",
+    lastValidationDate: "2024-08-10",
+    nextValidationDate: "2025-02-10",
+    currentStatus: "Active",
+    currentLocation: "Tool Room A",
+    documents: "front-panel-fixture.pdf",
+    remarks: "Working fine",
+    createdBy: "Admin",
+    lastModifiedDate: "2024-12-01",
+  },
+  {
+    id: "FX-001",
+    fixtureCode: "FIX-1001",
+    fixtureName: "Front Panel Fixture",
+    model: "FP-XL",
+    supplierName: "Accurate Tools Pvt Ltd",
+    dateReceived: "2024-02-10",
+    validationCycle: "6 Months",
+    lastValidationDate: "2024-08-10",
+    nextValidationDate: "2025-02-10",
+    currentStatus: "Active",
+    currentLocation: "Tool Room A",
+    documents: "front-panel-fixture.pdf",
+    remarks: "Working fine",
+    createdBy: "Admin",
+    lastModifiedDate: "2024-12-01",
+  },
+  {
+    id: "FX-001",
+    fixtureCode: "FIX-1001",
+    fixtureName: "Front Panel Fixture",
+    model: "FP-XL",
+    supplierName: "Accurate Tools Pvt Ltd",
+    dateReceived: "2024-02-10",
+    validationCycle: "6 Months",
+    lastValidationDate: "2024-08-10",
+    nextValidationDate: "2025-02-10",
+    currentStatus: "Active",
+    currentLocation: "Tool Room A",
+    documents: "front-panel-fixture.pdf",
+    remarks: "Working fine",
+    createdBy: "Admin",
+    lastModifiedDate: "2024-12-01",
   },
 ];
 
 /* -------------------- COMPONENT -------------------- */
 
 export function FixtureMaster() {
-  const [fixtures] = useState<fixtureMasterType[]>(mockFixtures);
+  const [fixtures, setFixtures] = useState(mockFixtures);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingFixture, setEditingFixture] =
+    useState<fixtureMasterType | null>(null);
+
+  const { toast } = useToast();
+
+  /* -------- COLUMN VISIBILITY -------- */
 
   const [visibleColumns, setVisibleColumns] = useState({
     id: true,
@@ -112,6 +224,61 @@ export function FixtureMaster() {
     setVisibleColumns(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  /* -------- FORM -------- */
+
+  const form = useForm<fixtureMasterType>({
+    defaultValues: {
+      fixtureCode: "",
+      fixtureName: "",
+      model: "",
+      supplierName: "",
+      dateReceived: "",
+      validationCycle: "",
+      lastValidationDate: "",
+      nextValidationDate: "",
+      currentStatus: "",
+      currentLocation: "",
+      documents: "",
+      remarks: "",
+      createdBy: "",
+      lastModifiedDate: "",
+    },
+  });
+
+  const onSubmit = (data: fixtureMasterType) => {
+    if (editingFixture) {
+      setFixtures(prev =>
+        prev.map(f =>
+          f.id === editingFixture.id ? { ...data, id: f.id } : f
+        )
+      );
+      toast({ title: "Fixture Updated" });
+    } else {
+      setFixtures(prev => [
+        ...prev,
+        { ...data, id: `FX-${Date.now()}` },
+      ]);
+      toast({ title: "Fixture Added" });
+    }
+
+    setIsDialogOpen(false);
+    setEditingFixture(null);
+    form.reset();
+  };
+
+  const handleEdit = (fixture: fixtureMasterType) => {
+    setEditingFixture(fixture);
+    form.reset(fixture);
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = (id?: string) => {
+    setFixtures(prev => prev.filter(f => f.id !== id));
+    toast({ title: "Fixture Deleted" });
+  };
+
+  /* -------------------- UI -------------------- */
+
   return (
     <Card>
       <CardHeader>
@@ -123,31 +290,85 @@ export function FixtureMaster() {
             </CardDescription>
           </div>
 
-          {/* COLUMN VISIBILITY */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Settings2 className="mr-2 h-4 w-4" />
-                View Columns
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
+          <div className="flex gap-2 max-sm:flex-col">
+            {/* COLUMN VISIBILITY */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Settings2 className="mr-2 h-4 w-4" />
+                  View Columns
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="h-64 overflow-y-auto">
-              {Object.keys(visibleColumns).map(key => (
-                <DropdownMenuCheckboxItem
-                  key={key}
-                  checked={visibleColumns[key as keyof typeof visibleColumns]}
-                  onCheckedChange={() =>
-                    toggleColumn(key as keyof typeof visibleColumns)
-                  }
-                  className="capitalize"
-                >
-                  {key.replace(/([A-Z])/g, " $1")}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <DropdownMenuContent className="h-64 overflow-y-auto">
+                {Object.keys(visibleColumns).map(key => (
+                  <DropdownMenuCheckboxItem
+                    key={key}
+                    checked={visibleColumns[key as keyof typeof visibleColumns]}
+                    onCheckedChange={() =>
+                      toggleColumn(key as keyof typeof visibleColumns)
+                    }
+                    className="capitalize"
+                  >
+                    {key.replace(/([A-Z])/g, " $1")}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* ADD / EDIT DIALOG */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Fixture
+                </Button>
+              </DialogTrigger>
+
+              <DialogContent className="max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingFixture ? "Edit Fixture" : "Add Fixture"}
+                  </DialogTitle>
+                </DialogHeader>
+
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="grid grid-cols-2 gap-4"
+                  >
+                    {Object.keys(form.getValues()).map(key => (
+                      <FormField
+                        key={key}
+                        control={form.control}
+                        name={key as any}
+                        rules={{ required: "Required" }}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{key}</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+
+                    <DialogFooter className="col-span-2">
+                      <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogClose>
+                      <Button type="submit">
+                        {editingFixture ? "Save Changes" : "Add Fixture"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </CardHeader>
 
@@ -179,31 +400,18 @@ export function FixtureMaster() {
               {fixtures.map(fixture => (
                 <TableRow key={fixture.id}>
                   {visibleColumns.id && <TableCell>{fixture.id}</TableCell>}
-                  {visibleColumns.fixtureCode && <TableCell>{fixture.fixtureCode}</TableCell>}
-                  {visibleColumns.fixtureName && <TableCell>{fixture.fixtureName}</TableCell>}
-                  {visibleColumns.model && <TableCell>{fixture.model}</TableCell>}
-                  {visibleColumns.supplierName && <TableCell>{fixture.supplierName}</TableCell>}
-                  {visibleColumns.dateReceived && <TableCell>{fixture.dateReceived}</TableCell>}
-                  {visibleColumns.validationCycle && <TableCell>{fixture.validationCycle}</TableCell>}
-                  {visibleColumns.lastValidationDate && <TableCell>{fixture.lastValidationDate}</TableCell>}
-                  {visibleColumns.nextValidationDate && <TableCell>{fixture.nextValidationDate}</TableCell>}
-                  {visibleColumns.currentStatus && <TableCell>{fixture.currentStatus}</TableCell>}
-                  {visibleColumns.currentLocation && <TableCell>{fixture.currentLocation}</TableCell>}
-                  {visibleColumns.documents && <TableCell>{fixture.documents}</TableCell>}
-                  {visibleColumns.createdBy && <TableCell>{fixture.createdBy}</TableCell>}
-                  {visibleColumns.lastModifiedDate && <TableCell>{fixture.lastModifiedDate}</TableCell>}
-                  {visibleColumns.remarks && (
-                    <TableCell className="max-w-[200px] truncate">
-                      {fixture.remarks}
-                    </TableCell>
-                  )}
+                  {Object.entries(fixture)
+                    .filter(([k]) => k !== "id")
+                    .map(([_, v], i) => (
+                      <TableCell key={i}>{v}</TableCell>
+                    ))}
 
                   {visibleColumns.actions && (
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(fixture)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(fixture.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </TableCell>

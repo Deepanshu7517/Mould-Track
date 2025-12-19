@@ -9,7 +9,7 @@ import type { HealthHistory } from "../../lib/data";
 const chartConfig = {
     avgHealthScore: {
       label: "Avg. Health Score",
-      color: "hsl(var(--primary))",
+      color: "#3b82f6",
     },
   };
   

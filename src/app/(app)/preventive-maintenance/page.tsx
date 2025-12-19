@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { PageHeader } from '../../../components/page-header';
 import { Button } from '../../../components/ui/button';
-import { CalendarPlus, FilterX } from 'lucide-preact';
+import {  FilterX, PlusCircle } from 'lucide-preact';
 import { PMSchedule } from '../../../components/preventive-maintenance/pm-schedule';
 import { PMStatusChart } from '../../../components/preventive-maintenance/pm-status-chart';
 import { pmSchedule } from '../../../lib/data';
@@ -43,8 +43,7 @@ export default function PreventiveMaintenancePage() {
     setFilterStatus(null);
     setFilterDate(null);
   };
-
-  const handleAddTask = (newTaskData: Omit<PMTask, 'ticketId' | 'status'>) => {
+  const handleScheduleSuccess = (newTaskData: Omit<PMTask, 'ticketId' | 'status'>) => {
     const newTask: PMTask = {
       ...newTaskData,
       ticketId: `PM-00${tasks.length + 1}`,
@@ -52,7 +51,7 @@ export default function PreventiveMaintenancePage() {
     };
     setTasks(prevTasks => [newTask, ...prevTasks]);
     setIsFormOpen(false);
-  };
+  }
 
   const handleUpdateTaskStatus = (ticketId: string, status: PMTask['status']) => {
     setTasks(prevTasks =>
@@ -85,18 +84,21 @@ export default function PreventiveMaintenancePage() {
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button>
-              <CalendarPlus className="mr-2 h-4 w-4" />
-              Schedule New PM
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Schedule PM Planning
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-2xl">
+          <DialogContent
+            className="sm:max-w-2xl"
+            onPointerDownOutside={(e) => e.preventDefault()}
+            onInteractOutside={(e) => e.preventDefault()}
+          >
+
             <DialogHeader>
-              <DialogTitle>Schedule New Preventive Maintenance</DialogTitle>
-              <DialogDescription>
-                Fill out the details below to add a new task to the schedule.
-              </DialogDescription>
+              <DialogTitle>Schedule New PM Task</DialogTitle>
+              <DialogDescription>Fill out the form below to create a new maintenance task.</DialogDescription>
             </DialogHeader>
-            <PMScheduleForm onSubmitSuccess={handleAddTask} />
+            <PMScheduleForm onSubmitSuccess={handleScheduleSuccess} />
           </DialogContent>
         </Dialog>
       </PageHeader>

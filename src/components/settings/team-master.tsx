@@ -42,6 +42,14 @@ import {
   CardTitle,
   CardDescription
 } from "../../components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu";
+import { Settings2, ChevronDown } from "lucide-preact";
+
 import { PlusCircle, Edit, Trash2 } from "lucide-preact";
 import { Badge } from '../../components/ui/badge';
 import { useToast } from '../../hooks/use-toast';
@@ -91,6 +99,26 @@ export function TeamMaster() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMemberFormValues | null>(null);
   const { toast } = useToast();
+  const [visibleColumns, setVisibleColumns] = useState({
+    id: true,
+    userName: true,
+    password: true,
+    fullName: true,
+    employeeId: true,
+    department: true,
+    role: true,
+    emailId: true,
+    mobileNumber: true,
+    status: true,
+    lastLogin: true,
+    createdBy: true,
+    remarks: true,
+    actions: true,
+  });
+
+  const toggleColumn = (key: keyof typeof visibleColumns) => {
+    setVisibleColumns(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const form = useForm<Omit<TeamMemberFormValues, "id">>({
     defaultValues: {
@@ -147,113 +175,140 @@ export function TeamMaster() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle>Team Master</CardTitle>
             <CardDescription>Manage all users</CardDescription>
           </div>
+     <div className="flex gap-2 max-sm:flex-col">
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Member
-              </Button>
-            </DialogTrigger>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Settings2 className="mr-2 h-4 w-4" />
+                  View Columns
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
 
-            <DialogContent className="max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingMember ? "Edit Member" : "Add Member"}
-                </DialogTitle>
-              </DialogHeader>
+              <DropdownMenuContent align="end" className="h-64 overflow-y-auto">
+                {Object.keys(visibleColumns).map(key => (
+                  <DropdownMenuCheckboxItem
+                    key={key}
+                    checked={visibleColumns[key as keyof typeof visibleColumns]}
+                    onCheckedChange={() =>
+                      toggleColumn(key as keyof typeof visibleColumns)
+                    }
+                    className="capitalize"
+                  >
+                    {key.replace(/([A-Z])/g, " $1")}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Member
+                </Button>
+              </DialogTrigger>
 
-                  {[
-                    "userName",
-                    "password",
-                    "fullName",
-                    "employeeId",
-                    "department",
-                    "emailId",
-                    "mobileNumber",
-                    "lastLogin",
-                    "createdBy",
-                    "remarks",
-                  ].map((field) => (
+              <DialogContent className="max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingMember ? "Edit Member" : "Add Member"}
+                  </DialogTitle>
+                </DialogHeader>
+
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
+
+                    {[
+                      "userName",
+                      "password",
+                      "fullName",
+                      "employeeId",
+                      "department",
+                      "emailId",
+                      "mobileNumber",
+                      "lastLogin",
+                      "createdBy",
+                      "remarks",
+                    ].map((field) => (
+                      <FormField
+                        key={field}
+                        control={form.control}
+                        name={field as any}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{field.name}</FormLabel>
+                            <FormControl>
+                              <Input {...field} type={field.name === "password" ? "password" : "text"} />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+
                     <FormField
-                      key={field}
                       control={form.control}
-                      name={field as any}
+                      name="role"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{field.name}</FormLabel>
-                          <FormControl>
-                            <Input {...field} type={field.name === "password" ? "password" : "text"} />
-                          </FormControl>
+                          <FormLabel>Role</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select role" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Operator">Operator</SelectItem>
+                              <SelectItem value="Maintenance Engineer">Maintenance Engineer</SelectItem>
+                              <SelectItem value="Supervisor">Supervisor</SelectItem>
+                              <SelectItem value="QA">QA</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </FormItem>
                       )}
                     />
-                  ))}
 
-                  <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select role" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Operator">Operator</SelectItem>
-                            <SelectItem value="Maintenance Engineer">Maintenance Engineer</SelectItem>
-                            <SelectItem value="Supervisor">Supervisor</SelectItem>
-                            <SelectItem value="QA">QA</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Active">Active</SelectItem>
+                              <SelectItem value="Inactive">Inactive</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Active">Active</SelectItem>
-                            <SelectItem value="Inactive">Inactive</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-
-                  <DialogFooter className="col-span-2">
-                    <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button type="submit">
-                      {editingMember ? "Save Changes" : "Add Member"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+                    <DialogFooter className="col-span-2">
+                      <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogClose>
+                      <Button type="submit">
+                        {editingMember ? "Save Changes" : "Add Member"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </CardHeader>
 
@@ -261,40 +316,69 @@ export function TeamMaster() {
         <Table>
           <TableHeader>
             <TableRow>
-              {Object.keys(mockTeam[0]).map(key => (
-                key !== "passwor" && <TableHead key={key}>{key}</TableHead>
-              ))}
-              <TableHead>Actions</TableHead>
+              {visibleColumns.id && <TableHead>ID</TableHead>}
+              {visibleColumns.userName && <TableHead>Username</TableHead>}
+              {visibleColumns.password && <TableHead>Password</TableHead>}
+              {visibleColumns.fullName && <TableHead>Full Name</TableHead>}
+              {visibleColumns.employeeId && <TableHead>Employee ID</TableHead>}
+              {visibleColumns.department && <TableHead>Department</TableHead>}
+              {visibleColumns.role && <TableHead>Role</TableHead>}
+              {visibleColumns.emailId && <TableHead>Email</TableHead>}
+              {visibleColumns.mobileNumber && <TableHead>Mobile</TableHead>}
+              {visibleColumns.status && <TableHead>Status</TableHead>}
+              {visibleColumns.lastLogin && <TableHead>Last Login</TableHead>}
+              {visibleColumns.createdBy && <TableHead>Created By</TableHead>}
+              {visibleColumns.remarks && <TableHead>Remarks</TableHead>}
+              {visibleColumns.actions && (
+                <TableHead className="text-right">Actions</TableHead>
+              )}
             </TableRow>
           </TableHeader>
+
 
           <TableBody>
             {team.map(member => (
               <TableRow key={member.id}>
-                <TableCell>{member.id}</TableCell>
-                <TableCell>{member.userName}</TableCell>
-                <TableCell>{member.password}</TableCell>
-                <TableCell>{member.fullName}</TableCell>
-                <TableCell>{member.employeeId}</TableCell>
-                <TableCell>{member.department}</TableCell>
-                <TableCell><Badge>{member.role}</Badge></TableCell>
-                <TableCell>{member.emailId}</TableCell>
-                <TableCell>{member.mobileNumber}</TableCell>
-                <TableCell><Badge>{member.status}</Badge></TableCell>
-                <TableCell>{member.lastLogin}</TableCell>
-                <TableCell>{member.createdBy}</TableCell>
-                <TableCell>{member.remarks}</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => handleEdit(member)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(member.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
+                {visibleColumns.id && <TableCell>{member.id}</TableCell>}
+                {visibleColumns.userName && <TableCell>{member.userName}</TableCell>}
+                {visibleColumns.password && <TableCell>{member.password}</TableCell>}
+                {visibleColumns.fullName && <TableCell>{member.fullName}</TableCell>}
+                {visibleColumns.employeeId && <TableCell>{member.employeeId}</TableCell>}
+                {visibleColumns.department && <TableCell>{member.department}</TableCell>}
+                {visibleColumns.role && (
+                  <TableCell><Badge>{member.role}</Badge></TableCell>
+                )}
+                {visibleColumns.emailId && <TableCell>{member.emailId}</TableCell>}
+                {visibleColumns.mobileNumber && <TableCell>{member.mobileNumber}</TableCell>}
+                {visibleColumns.status && (
+                  <TableCell><Badge>{member.status}</Badge></TableCell>
+                )}
+                {visibleColumns.lastLogin && <TableCell>{member.lastLogin}</TableCell>}
+                {visibleColumns.createdBy && <TableCell>{member.createdBy}</TableCell>}
+                {visibleColumns.remarks && <TableCell>{member.remarks}</TableCell>}
+
+                {visibleColumns.actions && (
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(member)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(member.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
+
         </Table>
       </CardContent>
     </Card>

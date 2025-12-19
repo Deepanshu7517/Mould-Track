@@ -210,12 +210,11 @@ export function MouldMaster() {
             <CardTitle>Mould Master</CardTitle>
             <CardDescription>Manage all moulds in the system.</CardDescription>
           </div>
-
-          <div className="flex items-center gap-2 max-sm:flex-col">
+ <div className="flex gap-2 max-sm:flex-col">
             {/* COLUMN VISIBILITY DROPDOWN */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-auto">
+                <Button variant="outline" className="">
                   <Settings2 className="mr-2 h-4 w-4" />
                   View Columns
                   <ChevronDown className="ml-2 h-4 w-4" />

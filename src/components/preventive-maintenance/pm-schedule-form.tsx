@@ -1,4 +1,11 @@
-import { useForm, useFieldArray } from 'react-hook-form';
+'use client'
+
+import * as React from 'react'
+import { useForm } from 'react-hook-form'
+import { format, addDays } from 'date-fns'
+import { Check, ChevronsUpDown } from 'lucide-preact'
+
+/* -------------------- UI IMPORTS -------------------- */
 
 import {
   Form,
@@ -7,278 +14,284 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../../components/ui/form';
-import { Input } from '../../components/ui/input';
-import { Button } from '../../components/ui/button';
+} from '../../components/ui/form'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
-import { Calendar } from '../../components/ui/calendar';
-import { Textarea } from '../ui/textarea';
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from '../../components/ui/popover'
+import { cn } from '../../lib/utils'
 
-import { useToast } from '../../hooks/use-toast';
-import { machineData, teamData } from '../../lib/data';
-import type { PMTask } from '../../lib/data';
-import { cn } from '../../lib/utils';
+/* -------------------- COMMAND (INLINE) -------------------- */
 
-import { CalendarIcon, PlusCircle, Trash2 } from 'lucide-preact';
-import { format } from 'date-fns';
+import { Command as CommandPrimitive } from 'cmdk'
 
-/* -------------------- Types -------------------- */
+const Command = React.forwardRef<
+  React.ElementRef<typeof CommandPrimitive>,
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive>
+>((props, ref) => (
+  <CommandPrimitive
+    ref={ref}
+    className="flex w-full flex-col rounded-md border bg-popover text-popover-foreground"
+    {...props}
+  />
+))
+Command.displayName = 'Command'
 
-interface ScheduleFormValues {
-  machineId: string;
-  activity: string;
-  frequency: string;
-  assignee: string;
-  dueDate: Date;
-  checklist?: { text: string }[];
+const CommandInput = React.forwardRef<
+  React.ElementRef<typeof CommandPrimitive.Input>,
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
+>((props, ref) => (
+  <CommandPrimitive.Input
+    ref={ref}
+    className="h-10 w-full border-b px-3 text-sm outline-none bg-background placeholder:text-muted-foreground"
+    {...props}
+  />
+))
+CommandInput.displayName = 'CommandInput'
+
+const CommandList = React.forwardRef<
+  React.ElementRef<typeof CommandPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>
+>((props, ref) => (
+  <CommandPrimitive.List
+    ref={ref}
+    className="max-h-60 overflow-y-auto"
+    {...props}
+  />
+))
+CommandList.displayName = 'CommandList'
+
+const CommandEmpty = React.forwardRef<
+  React.ElementRef<typeof CommandPrimitive.Empty>,
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Empty>
+>((props, ref) => (
+  <CommandPrimitive.Empty
+    ref={ref}
+    className="py-6 text-center text-sm"
+    {...props}
+  />
+))
+CommandEmpty.displayName = 'CommandEmpty'
+
+const CommandItem = React.forwardRef<
+  React.ElementRef<typeof CommandPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item>
+>((props, ref) => (
+  <CommandPrimitive.Item
+    ref={ref}
+    className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm aria-selected:bg-accent"
+    {...props}
+  />
+))
+CommandItem.displayName = 'CommandItem'
+
+/* -------------------- COMBOBOX -------------------- */
+
+type Option = { value: string; label: string }
+
+function Combobox({
+  options,
+  value,
+  onChange,
+  placeholder,
+}: {
+  options: Option[]
+  value: string
+  onChange: (value: string) => void
+  placeholder: string
+}) {
+  const [open, setOpen] = React.useState(false)
+
+  return (
+    <Popover open={open} onOpenChange={setOpen} modal={false}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          role="combobox"
+          variant="outline"
+          className={cn(
+            'h-10 w-full justify-between px-3 py-2 text-sm',
+            'bg-[#F5F7F9] border border-input',
+            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+          )}
+        >
+          {value
+            ? options.find(o => o.value === value)?.label
+            : placeholder}
+          <ChevronsUpDown className="h-4 w-4 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent
+        className="p-0"
+        style={{ width: 'var(--radix-popover-trigger-width)' }}
+      >
+        <Command>
+          <CommandInput placeholder="Search..." />
+          <CommandList>
+            <CommandEmpty>No result found.</CommandEmpty>
+            {options.map(option => (
+              <CommandItem
+                key={option.value}
+                value={option.label}
+                onSelect={() => {
+                  onChange(option.value)
+                  setOpen(false)
+                }}
+              >
+                <Check
+                  className={cn(
+                    'h-4 w-4',
+                    value === option.value ? 'opacity-100' : 'opacity-0'
+                  )}
+                />
+                {option.label}
+              </CommandItem>
+            ))}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
 }
 
-interface PMScheduleFormProps {
-  onSubmitSuccess: (data: Omit<PMTask, 'ticketId' | 'status'>) => void;
+/* -------------------- DATA -------------------- */
+
+import { machineData, checksheetData } from '../../lib/data'
+import type { PMTask } from '../../lib/data'
+import { useToast } from '../../hooks/use-toast'
+
+const mouldOptions = machineData.map(m => ({
+  value: m.id,
+  label: `${m.name} (${m.id})`,
+}))
+
+const checksheetOptions = checksheetData.map(cs => ({
+  value: cs.id,
+  label: cs.name,
+}))
+
+/* -------------------- FORM -------------------- */
+
+interface FormValues {
+  mould: string
+  assignee: string
+  checksheet: string
 }
 
-/* -------------------- Component -------------------- */
+export function PMScheduleForm({
+  onSubmitSuccess,
+}: {
+  onSubmitSuccess: (data: Omit<PMTask, 'ticketId' | 'status'>) => void
+}) {
+  const { toast } = useToast()
 
-export function PMScheduleForm({ onSubmitSuccess }: PMScheduleFormProps) {
-  const { toast } = useToast();
-
-  const form = useForm<ScheduleFormValues>({
+  const form = useForm<FormValues>({
     defaultValues: {
-      machineId: '',
-      activity: '',
-      frequency: 'Monthly',
+      mould: '',
       assignee: '',
-      checklist: [{ text: '' }],
+      checksheet: '',
     },
-  });
+  })
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: 'checklist',
-  });
+  const dueDate = addDays(new Date(), 7)
 
-  const onSubmit = (data: ScheduleFormValues) => {
-    const machine = machineData.find(m => m.id === data.machineId);
-    if (!machine) return;
+  const onSubmit = (data: FormValues) => {
+    const machine = machineData.find(m => m.id === data.mould)
+    const checksheet = checksheetData.find(c => c.id === data.checksheet)
+    if (!machine || !checksheet) return
 
-    const submissionData = {
-      ...data,
-      dueDate: format(data.dueDate, 'yyyy-MM-dd'),
+    onSubmitSuccess({
+      machineId: machine.id,
       machineName: machine.name,
       location: `Shop Floor ${machine.id.slice(-1)}`,
-      checklist: data.checklist
-        ?.map(item => item.text)
-        .filter(text => text.trim() !== ''),
-    };
+      activity: checksheet.name,
+      frequency: 'Ad-hoc',
+      assignee: data.assignee,
+      dueDate: format(dueDate, 'yyyy-MM-dd'),
+      checklist: checksheet.tasks,
+    })
 
     toast({
       title: 'PM Task Scheduled',
-      description: `Successfully scheduled task for machine ${data.machineId}.`,
-    });
+      description: `Task scheduled for mould ${machine.id}`,
+    })
 
-    onSubmitSuccess(submissionData);
-    form.reset();
-  };
+    form.reset()
+  }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Machine */}
-        <FormField
-          control={form.control}
-          name="machineId"
-          rules={{ required: 'Machine ID is required.' }}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Machine</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a machine" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {machineData.map(machine => (
-                    <SelectItem key={machine.id} value={machine.id}>
-                      {machine.name} ({machine.id})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        {/* Activity */}
         <FormField
           control={form.control}
-          name="activity"
-          rules={{ required: 'Activity is required.' }}
+          name="mould"
+          rules={{ required: 'Mould is required' }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Activity</FormLabel>
+              <FormLabel>Mould</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Monthly Lubrication" {...field} />
+                <Combobox
+                  options={mouldOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Search & select mould"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Frequency + Assignee */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="frequency"
-            rules={{ required: 'Frequency is required.' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Frequency</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select frequency" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Daily">Daily</SelectItem>
-                    <SelectItem value="Weekly">Weekly</SelectItem>
-                    <SelectItem value="Monthly">Monthly</SelectItem>
-                    <SelectItem value="Quarterly">Quarterly</SelectItem>
-                    <SelectItem value="Annually">Annually</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="assignee"
-            rules={{ required: 'Assignee is required.' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Assignee</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select assignee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {teamData.map(member => (
-                      <SelectItem key={member.id} value={member.name}>
-                        {member.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Due Date */}
         <FormField
           control={form.control}
-          name="dueDate"
-          rules={{ required: 'A due date is required.' }}
+          name="assignee"
+          rules={{ required: 'Assignee is required' }}
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Due Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full pl-3 text-left font-normal',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value ? format(field.value, 'PPP') : 'Pick a date'}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={date => date < new Date()}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+            <FormItem>
+              <FormLabel>Assignee</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter assignee" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Checklist */}
-        <div>
-          <FormLabel>Checklist</FormLabel>
-          <div className="mt-2 space-y-2">
-            {fields.map((item, index) => (
-              <FormField
-                key={item.id}
-                control={form.control}
-                name={`checklist.${index}.text`}
-                rules={{ required: 'Checklist item cannot be empty.' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center gap-2">
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder={`Checklist item ${index + 1}`}
-                          className="h-10 resize-none"
-                        />
-                      </FormControl>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => remove(index)}
-                        disabled={fields.length <= 1}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
-          </div>
+        <FormItem>
+          <FormLabel>Due Date</FormLabel>
+          <Input disabled value={format(dueDate, 'PPP')} />
+        </FormItem>
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="mt-2"
-            onClick={() => append({ text: '' })}
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Checklist Item
-          </Button>
-        </div>
+        <FormField
+          control={form.control}
+          name="checksheet"
+          rules={{ required: 'Checksheet is required' }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Checksheet</FormLabel>
+              <FormControl>
+                <Combobox
+                  options={checksheetOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Search & select checksheet"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Button type="submit" className="w-full">
           Schedule Task
         </Button>
+
       </form>
     </Form>
-  );
+  )
 }

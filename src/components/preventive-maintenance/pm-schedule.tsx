@@ -58,11 +58,11 @@ export function PMSchedule({ tasks, allTasks, onDateSelect, selectedDate, onUpda
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [checklistTask, setChecklistTask] = useState<PMTask | null>(null);
 
-  const handleDateSelectAndClose = (date: Date | undefined) => {
+  
+  const handleDateSelect = (date: Date | undefined) => {
     onDateSelect(date || null);
-    setIsCalendarOpen(false);
+    // setIsCalendarOpen(false); // Removed so the dialog stays open
   };
-
   return (
     <Card>
       <CardHeader>
@@ -87,7 +87,7 @@ export function PMSchedule({ tasks, allTasks, onDateSelect, selectedDate, onUpda
                 </DialogHeader>
                 <PMCalendar
                   events={allTasks}
-                  onDateSelect={handleDateSelectAndClose}
+                  onDateSelect={handleDateSelect} // Use the updated handler
                   selectedDate={selectedDate || undefined}
                 />
               </DialogContent>

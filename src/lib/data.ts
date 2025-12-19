@@ -201,3 +201,37 @@ export const pmSchedule: PMTask[] = [
 ];
 
     
+
+export type Checksheet = {
+  id: string;
+  name: string;
+  category: 'ECM' | 'HVAC' | 'Fixture' | 'Mould';
+  tasks: string[];
+};
+
+export const checksheetData: Checksheet[] = [
+    { 
+        id: 'CS-001', 
+        name: 'ECM Daily Inspection',
+        category: 'ECM',
+        tasks: ['Check for error codes', 'Inspect wiring harness', 'Listen for unusual noises'] 
+    },
+    { 
+        id: 'CS-002', 
+        name: 'HVAC Monthly Service',
+        category: 'HVAC',
+        tasks: ['Clean filters', 'Check refrigerant levels', 'Inspect blower motor'] 
+    },
+    { 
+        id: 'CS-003', 
+        name: 'Fixture Pre-Production Setup',
+        category: 'Fixture',
+        tasks: ['Verify clamp pressure', 'Check alignment pins', 'Confirm sensor functionality'] 
+    },
+    { 
+        id: 'CS-004', 
+        name: 'Mould General PM',
+        category: 'Mould',
+        tasks: ['Clean mould face', 'Inspect for flashing', 'Lubricate ejector pins', 'Check cooling channels'] 
+    },
+];

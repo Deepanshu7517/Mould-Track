@@ -1,6 +1,4 @@
-'use client';
-
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Change 1: Use useLocation
 import {
   Sidebar,
   SidebarHeader,
@@ -17,11 +15,14 @@ import {
   Activity,
   HeartPulse,
   CircleOff,
+  BrainCircuit,
   Settings,
   LogOut,
   CalendarCheck,
+  Zap,
   Database,
   Package,
+  ClipboardCheck,
 } from "lucide-preact";
 
 const navItems = [
@@ -31,53 +32,48 @@ const navItems = [
   { href: "/health", icon: HeartPulse, label: "Tool Health" },
   { href: "/breakdowns", icon: CircleOff, label: "Breakdowns" },
   { href: "/preventive-maintenance", icon: CalendarCheck, label: "PM Planning" },
+  { href: "/zbm", icon: Zap, label: "ZBM Overhaul" },
+  { href: "/analytics", icon: BrainCircuit, label: "Analytics" },
   { href: "/assets-management", icon: Package, label: "Assets Management" },
   { href: "/master-data", icon: Database, label: "Master Data" },
+  { href: "/check-sheet", icon: ClipboardCheck, label: "Check Sheet" },
 ];
 
 export function AppSidebar() {
-  const location = useLocation();
+  // Change 2: Get pathname from useLocation()
+  const { pathname } = useLocation();
 
   return (
-    <Sidebar
-      variant="sidebar"
-      collapsible="offcanvas"
-      className="border-r border-sidebar-border bg-sidebar pt-12 max-md:pb-24"
-    >
+    <Sidebar className={"border-r border-sidebar-border bg-sidebar pt-12 max-md:pb-24 pb-12"}>
       <SidebarHeader className="p-4">
-        <Logo textClassName="text-sidebar-foreground group-data-[collapsible=icon]:hidden" />
+        <Logo textClassName="text-sidebar-foreground" />
       </SidebarHeader>
-
       <SidebarContent className="p-2">
         <SidebarMenu>
-          {navItems.map((item) => {
-            const isActive = location.pathname.startsWith(item.href);
-
-            return (
-              <SidebarMenuItem key={item.href}>
-                <Link to={item.href}>
-                  <SidebarMenuButton
-                    data-active={isActive}
-                    tooltip={item.label}
-                    className="justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
-                    variant="ghost"
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            );
-          })}
+          {navItems.map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <Link to={item.href}>
+                <SidebarMenuButton
+                  // React Router location logic works the same for startsWith
+                  data-active={pathname.startsWith(item.href)}
+                  tooltip={item.label}
+                  className="justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                  variant="ghost"
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          ))}
         </SidebarMenu>
       </SidebarContent>
-
-      <SidebarFooter className="p-2 pb-12">
+      <SidebarFooter className="p-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <Link to="/settings">
               <SidebarMenuButton
-                data-active={location.pathname.startsWith("/settings")}
+                data-active={pathname.startsWith("/settings")}
                 tooltip="Settings"
                 className="justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
                 variant="ghost"
@@ -87,7 +83,6 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
-
           <SidebarMenuItem>
             <Link to="/login">
               <SidebarMenuButton

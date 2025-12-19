@@ -38,20 +38,13 @@ export function PMCalendar({ events, onDateSelect, selectedDate }: PMCalendarPro
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+
       <Calendar
-        mode="single"
         selected={selectedDate}
         onSelect={onDateSelect}
-        className="rounded-md border"
+        className="rounded-md border-none" // Removed border to match your beige style
         modifiers={{
           due: dueDates,
-        }}
-        modifiersStyles={{
-          due: {
-            fontWeight: 'bold',
-            color: 'hsl(var(--primary))',
-            textDecoration: 'underline',
-          },
         }}
       />
       <div className="space-y-4">

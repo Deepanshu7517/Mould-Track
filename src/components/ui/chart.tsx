@@ -51,19 +51,18 @@ const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(
   function ChartContainer({ id, className, children, config, ...props }, ref) {
     const uniqueId = React.useId()
     const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
-
     return (
-      <ChartContext.Provider value={{ config }}>
-        <div
-          ref={ref}
-          data-chart={chartId}
-          className={cn(
-            "flex aspect-video justify-center text-xs [&_.recharts-layer]:outline-none",
-            className
-          )}
-          {...props}
-        >
-          <ChartStyle id={chartId} config={config} />
+    <ChartContext.Provider value={{ config }}>
+    <div
+      ref={ref}
+      data-chart={chartId} // Ensure this matches exactly
+      className={cn(
+        "flex aspect-video justify-center text-xs",
+        className
+      )}
+      {...props}
+    >
+      <ChartStyle id={chartId} config={config} />
           <RechartsPrimitive.ResponsiveContainer>
             {children}
           </RechartsPrimitive.ResponsiveContainer>

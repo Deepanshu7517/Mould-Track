@@ -159,7 +159,7 @@ export function MachineMaster() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle>Machine Master</CardTitle>
             <CardDescription>
@@ -167,7 +167,7 @@ export function MachineMaster() {
             </CardDescription>
           </div>
 
-          <div className="flex gap-2 flex-wrap">
+     <div className="flex gap-2 max-sm:flex-col">
             {/* -------- View Columns Dropdown -------- */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
