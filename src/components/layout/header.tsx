@@ -26,7 +26,7 @@ export function AppHeader() {
   const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-4 border-b bg-card sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 mt-16 bg-[#FFF4CE]">
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-4 border-b bg-card sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 mt-16 pb-2 bg-[#FFF4CE]">
       {/* Mobile Toggle */}
       <Button
         size="icon"

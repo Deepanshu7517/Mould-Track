@@ -211,11 +211,11 @@ export function PMScheduleForm({
     if (!machine || !checksheet) return
 
     onSubmitSuccess({
-      machineId: machine.id,
-      machineName: machine.name,
+      mouldId: machine.id,
+      mouldName: machine.name,
       location: `Shop Floor ${machine.id.slice(-1)}`,
       activity: checksheet.name,
-      frequency: 'Ad-hoc',
+      checksheets: 'Ad-hoc',
       assignee: data.assignee,
       dueDate: format(dueDate, 'yyyy-MM-dd'),
       checklist: checksheet.tasks,

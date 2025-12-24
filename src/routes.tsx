@@ -12,6 +12,12 @@ import BreakdownsPage from "./app/(app)/breakdowns/page";
 import AssetsManagementPage from "./app/(app)/assets-management/page";
 import SettingsPage from "./app/(app)/settings/page";
 import CheckSheet from "./app/(app)/checkSheet/checkSheet";
+import MasterListChecksheet from "./components/mouldDetails/mouldDetails";
+import { Counter } from "./toolkit/features/counter/counter";
+import { PMScheduleForm } from "./app/(app)/preventive-maintenance/schedule/pm-schedule-forms";
+import AnalyticsPage from "./app/(app)/analytics/page";
+import QRCodePDFGenerator from "./qrGenerator";
+// import { MouldForm } from "./components/ui/MouldForm";
 
 const routes = createBrowserRouter([
   {
@@ -45,6 +51,14 @@ const routes = createBrowserRouter([
     </RootLayout>
   },
   {
+    path: "/preventive-maintenance/form",
+    element: <RootLayout>
+      <AppLayout>
+        <PMScheduleForm />
+      </AppLayout>
+    </RootLayout>
+  },
+  {
     path: "/master-data",
     element: <RootLayout>
       <AppLayout>
@@ -52,6 +66,14 @@ const routes = createBrowserRouter([
       </AppLayout>
     </RootLayout>
   },
+  // {
+  //   path: "/mould-form",
+  //   element: <RootLayout>
+  //     <AppLayout>
+  //       <MouldForm />
+  //     </AppLayout>
+  //   </RootLayout>
+  // },
   {
     path: "/monitoring",
     element: <RootLayout>
@@ -99,6 +121,34 @@ const routes = createBrowserRouter([
         <CheckSheet />
       </AppLayout>
     </RootLayout>
+  },
+  {
+    path: "/analytics",
+    element: <RootLayout>
+      <AppLayout>
+        <AnalyticsPage />
+      </AppLayout>
+    </RootLayout>
+  },
+  {
+    path: "/master-list-checksheet",
+    element: <RootLayout>
+      <AppLayout>
+        <MasterListChecksheet />
+      </AppLayout>
+    </RootLayout>
+  },
+  {
+    path: "/qr-generator",
+    element: <RootLayout>
+      <AppLayout>
+        <QRCodePDFGenerator />
+      </AppLayout>
+    </RootLayout>
+  },
+  {
+    path: "/counter",
+    element: <Counter />
   },
 ])
 const RouterProviderComponent = () => {

@@ -16,6 +16,7 @@ const statusVariant: { [key: string]: "default" | "destructive" | "secondary" | 
   Breakdown: "destructive",
   Maintenance: "secondary",
   Idle: "outline",
+  MouldChanging: "outline"
 };
 
 const statusConfig = {
@@ -23,6 +24,7 @@ const statusConfig = {
   Breakdown: { color: 'bg-red-500', icon: <AlertTriangle className="h-4 w-4" /> },
   Maintenance: { color: 'bg-blue-500', icon: <Stethoscope className="h-4 w-4" /> },
   Idle: { color: 'bg-gray-400', icon: <Pause className="h-4 w-4" /> },
+  MouldChanging: { color: 'bg-gray-400', icon: <Pause className="h-4 w-4" /> },
 };
 
 

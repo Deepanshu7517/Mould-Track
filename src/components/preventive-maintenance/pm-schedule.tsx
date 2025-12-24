@@ -19,7 +19,7 @@ import {
 } from '../../components/ui/table';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
-import { FileText, MoreVertical, Calendar, CheckCircle } from 'lucide-preact';
+import {  MoreVertical, Calendar, CheckCircle } from 'lucide-preact';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,10 +102,10 @@ export function PMSchedule({ tasks, allTasks, onDateSelect, selectedDate, onUpda
               <TableHeader>
                 <TableRow>
                   <TableHead>Ticket No.</TableHead>
-                  <TableHead>Machine</TableHead>
+                  <TableHead>Mould</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Activity</TableHead>
-                  <TableHead>Frequency</TableHead>
+                  <TableHead>Checksheet</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Assignee</TableHead>
                   <TableHead>Due Date</TableHead>
@@ -117,14 +117,14 @@ export function PMSchedule({ tasks, allTasks, onDateSelect, selectedDate, onUpda
                   <TableRow key={item.ticketId}>
                     <TableCell className="font-medium">{item.ticketId}</TableCell>
                     <TableCell>
-                      <div>{item.machineName}</div>
+                      <div>{item.mouldName}</div>
                       <div className="text-xs text-muted-foreground">
-                        {item.machineId}
+                        {item.mouldId}
                       </div>
                     </TableCell>
                     <TableCell>{item.location}</TableCell>
                     <TableCell>{item.activity}</TableCell>
-                    <TableCell>{item.frequency}</TableCell>
+                    <TableCell>{item.checksheets}</TableCell>
                     <TableCell>
                       <Badge variant={statusVariant[item.status]} className={item.status === 'Completed' ? 'bg-green-500' : ''}>
                         {item.status}
@@ -140,10 +140,10 @@ export function PMSchedule({ tasks, allTasks, onDateSelect, selectedDate, onUpda
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onSelect={() => setChecklistTask(item)}>
+                          {/* <DropdownMenuItem onSelect={() => setChecklistTask(item)}>
                             <FileText className="mr-2 h-4 w-4" />
                             View Checklist
-                          </DropdownMenuItem>
+                          </DropdownMenuItem> */}
                           <DropdownMenuItem
                             onSelect={() => onUpdateStatus(item.ticketId, 'Completed')}
                             disabled={item.status === 'Completed'}
@@ -163,7 +163,7 @@ export function PMSchedule({ tasks, allTasks, onDateSelect, selectedDate, onUpda
             <DialogHeader>
               <DialogTitle>Maintenance Checklist for {checklistTask?.ticketId}</DialogTitle>
               <DialogDescription>
-                Activity: {checklistTask?.activity} for {checklistTask?.machineName}
+                Activity: {checklistTask?.activity} for {checklistTask?.mouldName}
               </DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-2">

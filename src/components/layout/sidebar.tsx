@@ -11,28 +11,30 @@ import {
 import { Logo } from "../../components/logo";
 import {
   LayoutDashboard,
-  CheckCheck,
-  Activity,
-  HeartPulse,
-  CircleOff,
-  Settings,
+  // CheckCheck,
+  // Activity,
+  // HeartPulse,
+  // CircleOff,
+  // Settings,
   LogOut,
   CalendarCheck,
   Database,
-  Package,
-  ClipboardCheck,
+  // Package,
+  // ClipboardCheck,
+  ChartNoAxesCombined,
 } from "lucide-preact";
 
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/validation", icon: CheckCheck, label: "Validation" },
-  { href: "/monitoring", icon: Activity, label: "Monitoring" },
-  { href: "/health", icon: HeartPulse, label: "Tool Health" },
-  { href: "/breakdowns", icon: CircleOff, label: "Breakdowns" },
+  // { href: "/validation", icon: CheckCheck, label: "Validation" },
+  // { href: "/monitoring", icon: Activity, label: "Monitoring" },
+  // { href: "/health", icon: HeartPulse, label: "Tool Health" },
+  // { href: "/breakdowns", icon: CircleOff, label: "Breakdowns" },
   { href: "/preventive-maintenance", icon: CalendarCheck, label: "PM Planning" },
-  { href: "/assets-management", icon: Package, label: "Assets Management" },
+  // { href: "/assets-management", icon: Package, label: "Assets Management" },
+  { href: "/analytics", icon: ChartNoAxesCombined, label: "Analytics" },
   { href: "/master-data", icon: Database, label: "Master Data" },
-  { href: "/check-sheet", icon: ClipboardCheck, label: "Check Sheet" },
+  // { href: "/check-sheet", icon: ClipboardCheck, label: "Check Sheet" },
 ];
 
 export function AppSidebar() {
@@ -66,7 +68,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="p-2">
         <SidebarMenu>
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <Link to="/settings">
               <SidebarMenuButton
                 data-active={pathname.startsWith("/settings")}
@@ -78,7 +80,7 @@ export function AppSidebar() {
                 <span>Settings</span>
               </SidebarMenuButton>
             </Link>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
           <SidebarMenuItem>
             <Link to="/login">
               <SidebarMenuButton

@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
 import type { PMTask } from '../../lib/data';
 import { cn } from '../../lib/utils';
@@ -52,7 +51,6 @@ export function PMStatusChart({ tasks, onStatusSelect, activeStatus }: PMStatusC
             <svg width={size} height={size} className="transform -rotate-90">
               {data.map((entry) => {
                 const percentage = (entry.value / totalTasks) * 100;
-                const strokeDashoffset = circumference - (percentage / 100) * circumference;
                 const currentOffset = cumulativeOffset;
                 
                 // Update offset for next segment

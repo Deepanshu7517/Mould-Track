@@ -59,7 +59,7 @@ export function PMCalendar({ events, onDateSelect, selectedDate }: PMCalendarPro
                 <CardHeader className="p-4">
                   <CardTitle className="text-base">{event.activity}</CardTitle>
                   <CardDescription>
-                    {event.machineName} ({event.machineId})
+                    {event.mouldName} ({event.mouldId})
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex items-center justify-between p-4 pt-0">
